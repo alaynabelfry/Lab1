@@ -27,4 +27,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\Downloads\279734fa83176f774c53d7b6a017b677650fca83.jpg">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="..\..\..\..\Downloads\76900865.jpg">
+      <Filter>Source Files</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

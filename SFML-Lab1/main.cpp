@@ -5,13 +5,24 @@ int main(int argc, char* argv)
 {
   sf::RenderWindow window(sf::VideoMode(600, 600), "Purple");
   
-  sf::CircleShape triangle(10, 3);
-  sf::RectangleShape lowerArmRect(sf::Vector2<float>(15.0f, 5.0f));
-  sf::RectangleShape upperArmRect(sf::Vector2<float>(15.0f, 5.0f));
+  sf::RectangleShape bodyRect(sf::Vector2<float>(10.0f, 50.0f));
+  sf::RectangleShape lowerRightArmRect(sf::Vector2<float>(15.0f, 5.0f));
+  sf::RectangleShape upperRightArmRect(sf::Vector2<float>(15.0f, 5.0f));
+  sf::RectangleShape lowerLeftArmRect(sf::Vector2<float>(15.0f, 5.0f));
+  sf::RectangleShape upperLeftArmRect(sf::Vector2<float>(15.0f, 5.0f));
+  sf::RectangleShape neckRect(sf::Vector2<float>(5.0f,10.0f));
+  sf::CircleShape headShape(8.0f, 3);
 
-  triangle.setFillColor(sf::Color::Magenta);
-  lowerArmRect.setFillColor(sf::Color::Blue);
-  upperArmRect.setFillColor(sf::Color::Red);
+
+
+  bodyRect.setFillColor(sf::Color::Magenta);
+  lowerRightArmRect.setFillColor(sf::Color::Blue);
+  upperRightArmRect.setFillColor(sf::Color::Red);
+  lowerLeftArmRect.setFillColor(sf::Color::Blue);
+  upperLeftArmRect.setFillColor(sf::Color::Red);
+  neckRect.setFillColor(sf::Color::Yellow);
+  headShape.setFillColor(sf::Color::Green);
+
 
   bool keyHeld = false;
 
@@ -21,33 +32,58 @@ int main(int argc, char* argv)
   float growthFactor = 1.001f;
   float shrinkFactor = 0.999f;
 
-  //triangle.setOrigin(10, 10);
-  triangle.setOrigin(20.0f, 20.0f);
-  triangle.setPosition(300, 300);
-  triangle.setScale(4, 4);
 
-  sf::Vector2<float> armPosition((triangle.getLocalBounds().width / 1.75f), (triangle.getLocalBounds().height / 1.5f));
-  sf::Vector2<float> armOrigin(0.0f, 2.5f);
+  bodyRect.setOrigin(5.0f, 50.0f);
+  bodyRect.setPosition(300, 300);
+  bodyRect.setScale(4, 4);
 
-  upperArmRect.setOrigin(armOrigin);
-  lowerArmRect.setOrigin(armOrigin);
+  sf::Vector2<float> rightArmPosition((bodyRect.getLocalBounds().width*0.9f), (bodyRect.getLocalBounds().top + 3.0f));
+  sf::Vector2<float> leftArmPosition((bodyRect.getLocalBounds().left*0.9f), (bodyRect.getLocalBounds().top + 3.0f));
+  sf::Vector2<float> neckPosition(bodyRect.getLocalBounds().width/2.0f, bodyRect.getLocalBounds().top);
+  sf::Vector2<float> headPosition(neckRect.getLocalBounds().width / 2.0f+8.0f, neckRect.getLocalBounds().top);
+  sf::Vector2<float> rightArmOrigin(0.0f, 2.5f);
+  sf::Vector2<float> leftArmOrigin(15.0f, 2.5f);
+  sf::Vector2<float> neckOrigin(2.5f, 10.0f);
+  sf::Vector2<float> headOrigin(16.0f, 8.0f);
 
-  lowerArmRect.setPosition(15.0f, 2.5f);
-  upperArmRect.setPosition(armPosition);
 
-  TransformNode head(&triangle);
-  TransformNode upperArm(&upperArmRect);
-  TransformNode lowerArm(&lowerArmRect);
+  upperRightArmRect.setOrigin(rightArmOrigin);
+  lowerRightArmRect.setOrigin(rightArmOrigin);
+  upperLeftArmRect.setOrigin(leftArmOrigin);
+  lowerLeftArmRect.setOrigin(leftArmOrigin);
+  neckRect.setOrigin(neckOrigin);
+  headShape.setOrigin(headOrigin);
 
-  upperArm.AddChild(&lowerArm);
-  head.AddChild(&upperArm);
+  lowerRightArmRect.setPosition(15.0f, 2.5f);
+  upperRightArmRect.setPosition(rightArmPosition);
+  lowerLeftArmRect.setPosition(0.0f, 2.5f);
+  upperLeftArmRect.setPosition(leftArmPosition);
+  neckRect.setPosition(neckPosition);
+  headShape.setPosition(headPosition);
+
+  TransformNode body(&bodyRect);
+  TransformNode upperRightArm(&upperRightArmRect);
+  TransformNode lowerRightArm(&lowerRightArmRect);
+  TransformNode upperLeftArm(&upperLeftArmRect);
+  TransformNode lowerLeftArm(&lowerLeftArmRect);
+  TransformNode neck(&neckRect);
+  TransformNode head(&headShape);
+  
+
+  upperRightArm.AddChild(&lowerRightArm);
+  upperLeftArm.AddChild(&lowerLeftArm);
+  neck.AddChild(&head);
+  body.AddChild(&neck);
+  body.AddChild(&upperLeftArm);
+  body.AddChild(&upperRightArm);
+
 
   sf::Clock deltaTime;
   while (window.isOpen())
   {
     float elaspedTime = deltaTime.restart().asSeconds();
 
-    sf::Transform transform = triangle.getTransform();
+    sf::Transform transform = bodyRect.getTransform();
 
     /*triangle.scale(scaleFactor, scaleFactor);
     float currentScale = triangle.getScale().x;
@@ -79,8 +115,12 @@ int main(int argc, char* argv)
     if (keyHeld)
     {
       float angleAmount = 90.0f;
-      lowerArmRect.rotate(angleAmount * elaspedTime);
-      upperArmRect.rotate(angleAmount * elaspedTime);
+	  bodyRect.rotate(angleAmount * elaspedTime);
+      lowerRightArmRect.rotate(angleAmount * elaspedTime);
+      upperRightArmRect.rotate(angleAmount * elaspedTime);
+	  lowerLeftArmRect.rotate(angleAmount * elaspedTime);
+	  upperLeftArmRect.rotate(angleAmount * elaspedTime);
+	  neckRect.rotate(angleAmount * elaspedTime);
     }
 
     window.clear(); // draw fullscreen graphic
@@ -90,12 +130,12 @@ int main(int argc, char* argv)
     window.draw(triangle);
     hierarchy = hierarchy * triangle.getTransform();
 
-    window.draw(lowerArmRect, hierarchy); // DRAWING with the triangle's transform.
-    hierarchy = hierarchy * lowerArmRect.getTransform();
+    window.draw(lowerRightArmRect, hierarchy); // DRAWING with the triangle's transform.
+    hierarchy = hierarchy * lowerRightArmRect.getTransform();
 
-    window.draw(upperArmRect, hierarchy); // DRAWING*/
+    window.draw(upperRightArmRect, hierarchy); // DRAWING*/
 
-    head.Draw(&window);
+    body.Draw(&window);
 
     window.display();
   }
